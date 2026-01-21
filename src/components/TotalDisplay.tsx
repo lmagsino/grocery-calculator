@@ -1,4 +1,11 @@
+import { useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+} from 'react-native-reanimated';
 import { colors, typography, spacing, layout, shadows, borderRadius } from '../theme';
 import { formatPeso } from '../utils/formatCurrency';
 
@@ -10,9 +17,36 @@ interface TotalDisplayProps {
 /**
  * Elevated total bar with prominent price display
  * Features asymmetric layout: item count left, total right
- * Uses Fraunces display font for the total amount
+ * Animates when total changes
  */
 export function TotalDisplay({ itemCount, total }: TotalDisplayProps) {
+  const totalScale = useSharedValue(1);
+  const countScale = useSharedValue(1);
+
+  // Animate total when it changes
+  useEffect(() => {
+    totalScale.value = withSequence(
+      withSpring(1.05, { damping: 10, stiffness: 400 }),
+      withSpring(1, { damping: 15, stiffness: 300 })
+    );
+  }, [total]);
+
+  // Animate count when it changes
+  useEffect(() => {
+    countScale.value = withSequence(
+      withSpring(1.1, { damping: 10, stiffness: 400 }),
+      withSpring(1, { damping: 15, stiffness: 300 })
+    );
+  }, [itemCount]);
+
+  const totalAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: totalScale.value }],
+  }));
+
+  const countAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: countScale.value }],
+  }));
+
   return (
     <View style={styles.container}>
       {/* Dashed receipt line */}
@@ -25,12 +59,16 @@ export function TotalDisplay({ itemCount, total }: TotalDisplayProps) {
       <View style={styles.content}>
         <View style={styles.itemCountSection}>
           <Text style={styles.itemCountLabel}>ITEMS</Text>
-          <Text style={styles.itemCountValue}>{itemCount}</Text>
+          <Animated.Text style={[styles.itemCountValue, countAnimatedStyle]}>
+            {itemCount}
+          </Animated.Text>
         </View>
 
         <View style={styles.totalSection}>
           <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>{formatPeso(total)}</Text>
+          <Animated.Text style={[styles.totalValue, totalAnimatedStyle]}>
+            {formatPeso(total)}
+          </Animated.Text>
         </View>
       </View>
     </View>

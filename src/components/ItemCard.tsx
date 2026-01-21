@@ -1,49 +1,54 @@
-import { StyleSheet, View, Text, TouchableOpacity, Animated } from 'react-native';
-import { useRef } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import Animated, {
+  FadeInRight,
+  FadeOutLeft,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  Layout,
+} from 'react-native-reanimated';
 import { colors, typography, spacing, borderRadius, shadows } from '../theme';
 import { GroceryItem } from '../types';
 import { formatPeso } from '../utils/formatCurrency';
 
 interface ItemCardProps {
   item: GroceryItem;
-  onEdit?: (item: GroceryItem) => void;
-  onDelete?: (id: string) => void;
+  onPress?: () => void;
+  onDelete?: () => void;
 }
 
 /**
  * Receipt-style item card with distinctive typography
- * Features item name (or placeholder), price in Fraunces font, and delete action
+ * Features smooth enter/exit animations and press feedback
  */
-export function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+export function ItemCard({ item, onPress, onDelete }: ItemCardProps) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   const handlePressIn = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 0.98,
-      useNativeDriver: true,
-    }).start();
+    scale.value = withSpring(0.98, { damping: 15, stiffness: 400 });
   };
 
   const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      friction: 3,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handleDelete = () => {
-    onDelete?.(item.id);
+    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
   };
 
   const displayName = item.name || 'Unnamed item';
-  const isUnnamed = !item.name;
+  const isUnnamed = !item.name || item.name === 'Item';
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ scale: scaleAnim }] }]}>
+    <Animated.View
+      style={[styles.container, animatedStyle]}
+      entering={FadeInRight.duration(300).springify()}
+      exiting={FadeOutLeft.duration(200)}
+      layout={Layout.springify()}
+    >
       <TouchableOpacity
         style={styles.content}
-        onPress={() => onEdit?.(item)}
+        onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={1}
@@ -64,7 +69,7 @@ export function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
 
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={handleDelete}
+        onPress={onDelete}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Text style={styles.deleteIcon}>✕</Text>
@@ -77,7 +82,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surface,
     borderRadius: borderRadius.lg,
-    marginBottom: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     ...shadows.md,
