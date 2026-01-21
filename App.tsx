@@ -1,13 +1,97 @@
 import { useCallback } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from './src/hooks/useFonts';
-import { colors, typography, spacing, layout, shadows } from './src/theme';
+import { GroceryProvider, useGrocery } from './src/context/GroceryContext';
+import {
+  Header,
+  ItemCard,
+  EmptyState,
+  TotalDisplay,
+  ActionButtons,
+  AddItemModal,
+} from './src/components';
+import { colors, spacing, layout } from './src/theme';
 
 // Keep splash screen visible while fonts load
 SplashScreen.preventAutoHideAsync();
+
+function HomeScreen() {
+  const {
+    currentItems,
+    itemCount,
+    total,
+    openAddModal,
+    deleteItem,
+    openEditModal,
+    saveTrip,
+  } = useGrocery();
+
+  const handleScan = () => {
+    // TODO: Implement in Phase 6
+    Alert.alert('Coming Soon', 'Barcode scanning will be available soon!');
+  };
+
+  const handleDone = () => {
+    Alert.alert(
+      'Save Trip',
+      `Save this shopping trip with ${itemCount} items totaling ₱${total.toFixed(2)}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Save', onPress: saveTrip },
+      ]
+    );
+  };
+
+  const handleHistory = () => {
+    // TODO: Implement in Phase 8
+    Alert.alert('Coming Soon', 'Shopping history will be available soon!');
+  };
+
+  return (
+    <View style={styles.screen}>
+      <Header onHistoryPress={handleHistory} />
+
+      {/* Content Area */}
+      <View style={styles.content}>
+        {currentItems.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {currentItems.map((item) => (
+              <ItemCard
+                key={item.id}
+                item={item}
+                onDelete={() => deleteItem(item.id)}
+                onPress={() => openEditModal(item)}
+              />
+            ))}
+          </ScrollView>
+        )}
+      </View>
+
+      {/* Total Display */}
+      <TotalDisplay itemCount={itemCount} total={total} />
+
+      {/* Action Buttons */}
+      <ActionButtons
+        onAddItem={openAddModal}
+        onScan={handleScan}
+        onDone={handleDone}
+        hasItems={currentItems.length > 0}
+      />
+
+      {/* Add/Edit Modal */}
+      <AddItemModal />
+    </View>
+  );
+}
 
 export default function App() {
   const { fontsLoaded, fontError } = useFonts();
@@ -28,43 +112,14 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.container} edges={['top']} onLayout={onLayoutRootView}>
-        <StatusBar style="light" />
-
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>GroceryCalc</Text>
-        </View>
-
-        {/* Main Content Area */}
-        <View style={styles.content}>
-          <View style={styles.emptyState}>
-            <View style={styles.emptyIconContainer}>
-              <Text style={styles.emptyIcon}>🛒</Text>
-            </View>
-            <Text style={styles.emptyTitle}>Ready to shop!</Text>
-            <Text style={styles.emptySubtitle}>
-              Add items to start tracking{'\n'}your grocery total
-            </Text>
-          </View>
-        </View>
-
-        {/* Total Bar */}
-        <View style={styles.totalBar}>
-          <View style={styles.totalContent}>
-            <View style={styles.itemCount}>
-              <Text style={styles.itemCountLabel}>ITEMS</Text>
-              <Text style={styles.itemCountValue}>0</Text>
-            </View>
-            <View style={styles.totalAmount}>
-              <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalValue}>₱0.00</Text>
-            </View>
-          </View>
-        </View>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <GroceryProvider>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.container} edges={['top']} onLayout={onLayoutRootView}>
+          <StatusBar style="light" />
+          <HomeScreen />
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </GroceryProvider>
   );
 }
 
@@ -81,93 +136,23 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  // Header - Bold sage green with display font
-  header: {
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: layout.screenPadding,
-    ...shadows.primary,
-  },
-  headerTitle: {
-    ...typography.display.medium,
-    color: colors.textInverse,
-    textAlign: 'center',
+  screen: {
+    flex: 1,
+    backgroundColor: colors.background,
   },
 
-  // Content area
   content: {
     flex: 1,
-    paddingHorizontal: layout.screenPadding,
   },
 
-  // Empty State - Warm, inviting
-  emptyState: {
+  scrollView: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 60,
-  },
-  emptyIconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.primaryMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xxl,
-    ...shadows.md,
-  },
-  emptyIcon: {
-    fontSize: 48,
-  },
-  emptyTitle: {
-    ...typography.display.small,
-    color: colors.text,
-    marginBottom: spacing.sm,
-  },
-  emptySubtitle: {
-    ...typography.body.medium,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
   },
 
-  // Total Bar - Elevated, prominent
-  totalBar: {
-    backgroundColor: colors.surface,
-    paddingVertical: spacing.xl,
+  scrollContent: {
     paddingHorizontal: layout.screenPadding,
-    borderTopLeftRadius: spacing.xxl,
-    borderTopRightRadius: spacing.xxl,
-    ...shadows.lg,
-  },
-  totalContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  itemCount: {
-    alignItems: 'flex-start',
-  },
-  itemCountLabel: {
-    ...typography.label.small,
-    color: colors.textMuted,
-    marginBottom: spacing.xs,
-  },
-  itemCountValue: {
-    ...typography.display.small,
-    color: colors.textSecondary,
-  },
-  totalAmount: {
-    alignItems: 'flex-end',
-  },
-  totalLabel: {
-    ...typography.label.medium,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-  },
-  totalValue: {
-    ...typography.price.large,
-    color: colors.text,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl,
+    gap: spacing.md,
   },
 });
