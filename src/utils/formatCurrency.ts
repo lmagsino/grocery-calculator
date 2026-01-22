@@ -47,3 +47,32 @@ export function formatInputValue(amount: number): string {
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
+
+/**
+ * Formats a date for display in history lists
+ * @param date - The date to format
+ * @returns Formatted string like "Jan 15, 2026"
+ */
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+/**
+ * Formats a date with time for detailed views
+ * @param date - The date to format
+ * @returns Formatted string like "Jan 15, 2026 at 2:30 PM"
+ */
+export function formatDateTime(date: Date): string {
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
