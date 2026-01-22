@@ -1,8 +1,12 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { GroceryItem, ShoppingTrip } from '../types';
 import { generateId } from '../utils/formatCurrency';
+import { useStorage } from '../hooks/useStorage';
 
 interface GroceryContextType {
+  // Loading state
+  isLoading: boolean;
+
   // Current shopping list
   currentItems: GroceryItem[];
 
@@ -38,6 +42,13 @@ interface GroceryContextType {
 const GroceryContext = createContext<GroceryContextType | undefined>(undefined);
 
 export function GroceryProvider({ children }: { children: React.ReactNode }) {
+  // Storage hook
+  const { loadAllData, saveCurrentItems, saveHistory } = useStorage();
+
+  // Loading state
+  const [isLoading, setIsLoading] = useState(true);
+  const isInitialized = useRef(false);
+
   // Current shopping list state
   const [currentItems, setCurrentItems] = useState<GroceryItem[]>([]);
 
@@ -51,6 +62,38 @@ export function GroceryProvider({ children }: { children: React.ReactNode }) {
 
   // Scanner state
   const [isScannerVisible, setIsScannerVisible] = useState(false);
+
+  // Load persisted data on mount
+  useEffect(() => {
+    async function loadPersistedData() {
+      try {
+        const { currentItems: savedItems, history: savedHistory } = await loadAllData();
+        setCurrentItems(savedItems);
+        setHistory(savedHistory);
+      } catch (error) {
+        console.error('Failed to load persisted data:', error);
+      } finally {
+        isInitialized.current = true;
+        setIsLoading(false);
+      }
+    }
+
+    loadPersistedData();
+  }, [loadAllData]);
+
+  // Auto-save current items when they change
+  useEffect(() => {
+    if (isInitialized.current) {
+      saveCurrentItems(currentItems);
+    }
+  }, [currentItems, saveCurrentItems]);
+
+  // Auto-save history when it changes
+  useEffect(() => {
+    if (isInitialized.current) {
+      saveHistory(history);
+    }
+  }, [history, saveHistory]);
 
   // Computed values
   const itemCount = currentItems.length;
@@ -144,6 +187,7 @@ export function GroceryProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value: GroceryContextType = {
+    isLoading,
     currentItems,
     itemCount,
     total,
