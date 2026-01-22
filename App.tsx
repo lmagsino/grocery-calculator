@@ -21,6 +21,7 @@ SplashScreen.preventAutoHideAsync();
 
 function HomeScreen() {
   const {
+    isLoading,
     currentItems,
     itemCount,
     total,
@@ -33,6 +34,15 @@ function HomeScreen() {
     closeScanner,
     openAddModalWithScan,
   } = useGrocery();
+
+  // Show loading indicator while persisted data is being loaded
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   const handleDone = () => {
     Alert.alert(
