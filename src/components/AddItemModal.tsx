@@ -64,11 +64,18 @@ export function AddItemModal() {
     setError('');
   };
 
+  const MAX_PRICE = 99999.99;
+
   const handleSubmit = () => {
     const price = parsePeso(priceInput);
 
     if (price <= 0) {
       setError('Please enter a valid price');
+      return;
+    }
+
+    if (price > MAX_PRICE) {
+      setError('Maximum price is ₱99,999.99');
       return;
     }
 
@@ -114,6 +121,8 @@ export function AddItemModal() {
                   onPress={handleClose}
                   style={styles.closeButton}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  accessibilityLabel="Close modal"
+                  accessibilityRole="button"
                 >
                   <Text style={styles.closeButtonText}>✕</Text>
                 </TouchableOpacity>
