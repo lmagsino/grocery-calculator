@@ -71,6 +71,8 @@ export function ItemCard({ item, onPress, onDelete }: ItemCardProps) {
         style={styles.deleteButton}
         onPress={onDelete}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        accessibilityLabel={`Delete ${item.name || 'item'}`}
+        accessibilityRole="button"
       >
         <Text style={styles.deleteIcon}>✕</Text>
       </TouchableOpacity>

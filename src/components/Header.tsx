@@ -16,6 +16,8 @@ export function Header({ onHistoryPress }: HeaderProps) {
         style={styles.historyButton}
         onPress={onHistoryPress}
         activeOpacity={0.7}
+        accessibilityLabel="View shopping history"
+        accessibilityRole="button"
       >
         <Text style={styles.historyIcon}>📋</Text>
         <Text style={styles.historyLabel}>History</Text>

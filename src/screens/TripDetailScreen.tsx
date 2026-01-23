@@ -23,6 +23,8 @@ export function TripDetailScreen({ trip, onClose }: TripDetailScreenProps) {
           style={styles.backButton}
           onPress={onClose}
           activeOpacity={0.7}
+          accessibilityLabel="Go back to history"
+          accessibilityRole="button"
         >
           <Text style={styles.backIcon}>←</Text>
           <Text style={styles.backLabel}>Back</Text>

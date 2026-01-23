@@ -24,6 +24,8 @@ export function HistoryScreen({ trips, onClose, onTripPress }: HistoryScreenProp
           style={styles.backButton}
           onPress={onClose}
           activeOpacity={0.7}
+          accessibilityLabel="Go back to shopping list"
+          accessibilityRole="button"
         >
           <Text style={styles.backIcon}>←</Text>
           <Text style={styles.backLabel}>Back</Text>

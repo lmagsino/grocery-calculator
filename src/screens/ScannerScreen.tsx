@@ -103,7 +103,12 @@ export function ScannerScreen({ onClose, onProductScanned, onManualEntry }: Scan
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            accessibilityLabel="Close scanner"
+            accessibilityRole="button"
+          >
             <Text style={styles.closeButtonText}>✕</Text>
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Scan Barcode</Text>
@@ -116,10 +121,20 @@ export function ScannerScreen({ onClose, onProductScanned, onManualEntry }: Scan
             We need camera access to scan barcodes.{'\n'}
             Please enable it in your device settings.
           </Text>
-          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+          <TouchableOpacity
+            style={styles.permissionButton}
+            onPress={requestPermission}
+            accessibilityLabel="Grant camera permission"
+            accessibilityRole="button"
+          >
             <Text style={styles.permissionButtonText}>Grant Permission</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.manualButton} onPress={onManualEntry}>
+          <TouchableOpacity
+            style={styles.manualButton}
+            onPress={onManualEntry}
+            accessibilityLabel="Enter item manually"
+            accessibilityRole="button"
+          >
             <Text style={styles.manualButtonText}>Enter Manually Instead</Text>
           </TouchableOpacity>
         </View>
@@ -131,7 +146,12 @@ export function ScannerScreen({ onClose, onProductScanned, onManualEntry }: Scan
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+        <TouchableOpacity
+          onPress={onClose}
+          style={styles.closeButton}
+          accessibilityLabel="Close scanner"
+          accessibilityRole="button"
+        >
           <Text style={styles.closeButtonText}>✕</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Scan Barcode</Text>
@@ -188,7 +208,12 @@ export function ScannerScreen({ onClose, onProductScanned, onManualEntry }: Scan
         <Text style={styles.instruction}>
           Point camera at a product barcode
         </Text>
-        <TouchableOpacity style={styles.manualButton} onPress={onManualEntry}>
+        <TouchableOpacity
+          style={styles.manualButton}
+          onPress={onManualEntry}
+          accessibilityLabel="Enter item manually"
+          accessibilityRole="button"
+        >
           <Text style={styles.manualButtonText}>Enter Manually</Text>
         </TouchableOpacity>
       </View>
