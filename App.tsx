@@ -58,7 +58,17 @@ function HomeScreen() {
       `Save this shopping trip with ${itemCount} items totaling ₱${total.toFixed(2)}?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Save', onPress: saveTrip },
+        {
+          text: 'Save',
+          onPress: () => {
+            saveTrip();
+            Alert.alert(
+              'Trip Saved!',
+              'Your shopping trip has been saved to history.',
+              [{ text: 'OK' }]
+            );
+          },
+        },
       ]
     );
   };
